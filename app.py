@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import os
 from classifiers import ExpenseClassifier
-from classifiers import CategoryValidator
 from feedback import ExpenseFeedbackAgent
 from ui.streamlit_ui import ExpenseClassifierUI
 from rules.classification_rules import CLASSIFICATION_RULES as classification_rules
@@ -76,7 +75,6 @@ Você é um assistente especializado em identificar e classificar despesas ou fi
 CLASSIFICATION_RULES = classification_rules
 
 def main():
-    validator = CategoryValidator(VALID_CATEGORIES)
     classifier = ExpenseClassifier(DEEPSEEK_API_KEY, CLASSIFICATION_PROMPT, CLASSIFICATION_RULES)
     feedback_agent = ExpenseFeedbackAgent()
     ui = ExpenseClassifierUI(classifier, feedback_agent)
