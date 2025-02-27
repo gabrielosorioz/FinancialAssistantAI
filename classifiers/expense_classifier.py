@@ -39,6 +39,6 @@ class ExpenseClassifier:
             model="deepseek-chat",
             messages=[{"role": "system", "content": prompt}],
             temperature=0.1,
-            max_tokens=30,
+            max_tokens=300,
             stop=["\n", ".", "```"]
         )
