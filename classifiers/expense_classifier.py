@@ -26,13 +26,6 @@ class ExpenseClassifier:
         # Normaliza o texto (ex: lower case, remove espaços extras)
         return text.lower().strip()
 
-    def _apply_rules(self, normalized_input):
-        # Aplica regras pré-definidas
-        for pattern, category in self.rules.items():
-            if re.search(pattern, normalized_input, re.IGNORECASE):
-                return category
-        return None
-
     def _call_ai(self, prompt):
         # Chama a API da OpenAI/Deepseek
         return self.client.chat.completions.create(
