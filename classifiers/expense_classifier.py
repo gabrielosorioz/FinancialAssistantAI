@@ -3,23 +3,13 @@ import logging
 from openai import OpenAI
 
 class ExpenseClassifier:
-    def __init__(self, api_key, prompt_template, rules):
+    def __init__(self, api_key, prompt_template):
         self.client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com/v1")
         self.prompt_template = prompt_template
-        self.rules = rules
 
     def classify(self, user_input):
         try:
             clean_input = self._sanitize_input(user_input)
-            normalized_input = self._normalize_text(clean_input)
-
-            # Verifica regras antes de chamar a IA
-            category = self._apply_rules(normalized_input)
-            if category:
-                print("Resposta retornada sem API: " + category)
-                return category
-
-            # Se nenhuma regra for aplicada, chama a IA
             final_prompt = self.prompt_template.format(clean_input)
             response = self._call_ai(final_prompt)
             print(response.choices[0].message.content.strip())
