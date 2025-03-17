@@ -28,7 +28,6 @@ class OpenAIClient:
 
 if __name__ == "__main__":
 
-    # 1. Criar ou buscar um usuário
     user_repo = UserRepository()
     user = user_repo.get_by_id(1)
 
@@ -44,29 +43,25 @@ if __name__ == "__main__":
     user_message = "Gastei 200 reais no supermercado e 50 reais em transporte."
     print(f"\nProcessando mensagem: '{user_message}'")
 
-    # 4. Processar a mensagem para extrair despesas
     expenses = expense_ext_agent.process(user_message)
     print(f"Despesas extraídas: {len(expenses)}")
 
-    # 5. Criar repositório de despesas
+
     expense_repo = ExpenseRepository()
 
-    # 6. Salvar cada despesa no banco de dados
     saved_expenses = []
     for expense in expenses:
-        # Extrai os dados do objeto Expense
+
         expense_data = {
             "description": expense.description,
             "value": expense.value,
             "category": expense.category
         }
 
-        # Usa o repositório para criar a despesa
         saved_expense = expense_repo.create(expense_data, user)
         saved_expenses.append(saved_expense)
         print(f"Despesa salva: {saved_expense}")
 
-    # 7. Confirmar que todas as despesas foram salvas
     print(f"\nTotal de despesas salvas: {len(saved_expenses)}")
 
     all_user_expenses = user_repo.get_expenses(user.id)
