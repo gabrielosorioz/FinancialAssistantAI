@@ -60,8 +60,24 @@ class TestExpenseExtractor(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Salva os resultados dos testes em um arquivo JSON ao final"""
+        formatted_results = []
+
+        for test_case in cls.test_results:
+
+            if isinstance(test_case["output"], list) and all(isinstance(item, Expense) for item in test_case["output"]):
+                formatted_output = [expense.to_dict() for expense in test_case["output"]]
+            else:
+                formatted_output = test_case["output"]
+
+            formatted_results.append({
+                "input": test_case["input"],
+                "output": formatted_output
+            })
+
+        # Salva no arquivo JSON
         with open("expense_tests.json", "w", encoding="utf-8") as f:
-            json.dump(cls.test_results, f, ensure_ascii=False, indent=2)
+            json.dump(formatted_results, f, ensure_ascii=False, indent=2)
+
         print("\n📂 Resultados dos testes salvos em 'expense_tests.json'.")
 
 
