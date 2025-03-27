@@ -4,6 +4,7 @@ from typing import List, Optional
 import json
 import logging
 from dataclasses import dataclass
+import random
 
 # Configuração do logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -38,7 +39,7 @@ class ExpenseExtractorAgent(Agent):
     e retornar uma resposta estritamente no formato JSON. Para cada despesa identificada,
     crie um objeto JSON com os seguintes campos:
 
-    description: Uma string que descreve o item da despesa.
+    description: Uma string que descreve o item da despesa, com possíveis erros gramaticais corrigidos.
     value: Um número (float) representando o valor gasto.
     category: Uma string que indica a categoria da despesa.
     """
@@ -150,3 +151,57 @@ class ExpenseExtractorAgent(Agent):
                 response_message = data.get("response")
 
         return ProcessResult(expenses=expenses, response=response_message)
+
+
+class FeedbackAgent:
+    """Agente que gera feedback para o usuário com base no resultado da extração de despesas."""
+
+    @staticmethod
+    def generate_feedback(process_result: ProcessResult) -> str:
+        """
+        Gera uma mensagem de feedback amigável no formato de mensagem especificado.
+
+        Args:
+            process_result (ProcessResult): Resultado do processamento de despesas
+
+        Returns:
+            str: Mensagem de feedback formatada
+        """
+        if process_result.expenses:
+            # Mensagens de introdução variadas
+            intro_messages = [
+                "📊 Despesas Registradas",
+                "✅ Despesas Capturadas",
+                "🧾 Resumo de Despesas",
+            ]
+            intro_message = random.choice(intro_messages)
+
+            message = f"{intro_message}\n\n"
+
+            # Formatação para múltiplas despesas
+            for i, expense in enumerate(process_result.expenses, 1):
+                formatted_value = f"{expense.value:.2f}"
+                message += (
+                    f"{i}.📍 Descrição: {expense.description}\n"
+                    f"💰 Valor: R$ {formatted_value}\n"
+                    f"🏷️ Categoria: {expense.category}\n"
+                )
+
+                # Adiciona uma linha em branco entre as despesas, exceto após a última
+                if i < len(process_result.expenses):
+                    message += "\n"
+
+            return message
+
+        elif process_result.response:
+            return process_result.response
+
+        else:
+            # Mensagens quando nenhuma despesa é encontrada
+            out_of_context_messages = [
+                "❌ Nenhuma despesa identificada",
+                "🔍 Não foram encontrados registros de despesas",
+                "❓ Sem informações de gastos processadas",
+                "⚠️ Nenhuma transação financeira detectada"
+            ]
+            return random.choice(out_of_context_messages)

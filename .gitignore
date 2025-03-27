@@ -2,3 +2,4 @@
 .idea
 .env
 /expense_classifier.log
+./financial_assistant.db

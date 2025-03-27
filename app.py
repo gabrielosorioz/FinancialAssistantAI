@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-from agents import ExpenseExtractorAgent
+from agents import ExpenseExtractorAgent, FeedbackAgent
 from agents.expense_extractor import ProcessResult
 from repository import UserRepository,ExpenseRepository
 
@@ -38,7 +38,10 @@ if __name__ == "__main__":
     client = OpenAIClient(DEEPSEEK_API_KEY, BASE_URL)
     expense_ext_agent = ExpenseExtractorAgent(client=client, user=user)
 
+
     result: ProcessResult = expense_ext_agent.process("Gastei 30,,50 fastfood 10 99 coca cola e 30 20 baseado")
+
+    print(FeedbackAgent.generate_feedback(result))
 
     if result.expenses:
         for expense in result.expenses:
