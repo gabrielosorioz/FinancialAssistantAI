@@ -42,6 +42,7 @@ class ExpenseExtractorAgent(Agent):
     description: Uma string que descreve o item da despesa, com possíveis erros gramaticais corrigidos.
     value: Um número (float) representando o valor gasto.
     category: Uma string que indica a categoria da despesa.
+    installments: (opcional) Um número inteiro representando o número total de parcelas, caso a compra seja parcelada.
     """
 
     TOOLS = [
@@ -61,7 +62,11 @@ class ExpenseExtractorAgent(Agent):
                                 "properties": {
                                     "description": {"type": "string", "description": "Descrição do item da despesa"},
                                     "value": {"type": "number", "description": "Valor gasto"},
-                                    "category": {"type": "string", "description": "Categoria da despesa"}
+                                    "category": {"type": "string", "description": "Categoria da despesa"},
+                                    "installments": {
+                                        "type": "integer",
+                                        "description": "Número de parcelas, se a compra for parcelada"
+                                    }
                                 },
                                 "required": ["description", "value", "category"]
                             }
