@@ -1,4 +1,7 @@
+import logging
 from abc import ABC, abstractmethod
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class Agent(ABC):
     """Classe base para agentes inteligentes."""
@@ -24,6 +27,34 @@ class Agent(ABC):
     def process(self, user_input: str):
         """Processa a entrada do usuário e retorna a resposta."""
         pass
+
+    @abstractmethod
+    def _process_tool_calls(self, response):
+        """
+        Processa as chamadas de ferramenta da resposta.
+        Deve ser implementado por subclasses para lidar com ferramentas específicas.
+        """
+        pass
+
+    def _get_response(self, user_input: str):
+        """Constrói a mensagem, envia ao modelo e atualiza o contexto."""
+        messages = self._build_messages(user_input)
+        response = self.client.send_messages(messages, self.tools)
+        self._log_response(user_input, response)
+        self._update_context(user_input, response)
+        return response
+
+    def _log_response(self, user_input, response):
+        """Registra as informações relevantes da resposta do agente."""
+        logger.info("Entrada do usuário: %s", user_input)
+        logger.info("Resposta recebida: %s", response)
+
+        if hasattr(response, 'tool_calls') and response.tool_calls:
+            logger.info("Chamadas de ferramenta detectadas:")
+            for call in response.tool_calls:
+                logger.info("Função: %s, Argumentos: %s", call.function.name, call.function.arguments)
+        else:
+            logger.warning("Nenhuma chamada de ferramenta detectada.")
 
     def _build_messages(self, user_input: str):
         """Monta a lista de mensagens a serem enviadas ao modelo."""
