@@ -78,23 +78,6 @@ class ExpenseExtractorAgent(Agent):
         }
     ]
 
-    TOOLS.append({
-        "type": "function",
-        "function": {
-            "name": "handle_out_of_context",
-            "description": "Lida com mensagens que não contêm informações sobre despesas.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "response": {
-                        "type": "string",
-                        "description": "Resposta curta e objetiva para manter o foco no registro de despesas."
-                    }
-                },
-                "required": ["response"]
-            }
-        }
-    })
 
     def __init__(self, client, user, store_context=False, initial_context=None):
         """Inicializa o agente com um cliente e um usuário específico."""
