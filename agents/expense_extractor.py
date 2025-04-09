@@ -2,11 +2,6 @@ from . import Agent
 from models import Expense
 from typing import List, Any, Dict
 import json
-import logging
-# Configuração do logger
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
-
 
 class ExpenseExtractorAgent(Agent):
     """Agente especializado em extração de despesas."""
