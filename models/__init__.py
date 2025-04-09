@@ -1,1 +1,1 @@
-from .models import Expense, User, Base
+from .models import Expense, User, Base, Income
