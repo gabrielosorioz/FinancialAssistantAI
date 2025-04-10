@@ -1,10 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-from agents import ExpenseExtractorAgent, FeedbackAgent
-from agents.expense_extractor import ProcessResult
-from repository import UserRepository,ExpenseRepository
-
+from agents import TaskCoordinatorAgent
 # Carrega variáveis de ambiente
 load_dotenv()
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
@@ -28,23 +25,9 @@ class OpenAIClient:
 
 if __name__ == "__main__":
 
-    user_repo = UserRepository()
-    expense_repo = ExpenseRepository()
-    user = user_repo.get_by_id(1)
+    llmClient = OpenAIClient(
+        api_key=DEEPSEEK_API_KEY,
+        base_url=BASE_URL
+    )
 
-    if not user:
-        user = user_repo.create(name="João", email="joao@example.com")
-
-    client = OpenAIClient(DEEPSEEK_API_KEY, BASE_URL)
-    expense_ext_agent = ExpenseExtractorAgent(client=client, user=user)
-
-
-    result: ProcessResult = expense_ext_agent.process("Gastei 30,,50 fastfood 10 99 coca cola e 30 20 baseado")
-
-    print(FeedbackAgent.generate_feedback(result))
-
-    if result.expenses:
-        for expense in result.expenses:
-            expense_repo.create(expense,user)
-    elif result.response:
-        print(f"Resposta do agente: {result.response}")
+    TaskCoordinatorAgent(llmClient).process("Recebi R$ 3.000 de salário ontem e gastei R$ 200 com supermercado hoje.")
