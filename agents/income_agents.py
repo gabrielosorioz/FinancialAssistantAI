@@ -2,8 +2,6 @@ from . import Agent
 from models import Income
 from typing import List, Any, Dict
 import json
-import logging
-
 
 class IncomeExtractorAgent(Agent):
     """Agente especializado na identificação e registro de rendimentos."""
