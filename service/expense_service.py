@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from models import Expense
 from repository import ExpenseRepository
-from agents.expense_extractor import ExpenseExtractorAgent
+from agents.expense_agents import ExpenseExtractorAgent
 from typing import Optional, List, Dict, Tuple, Any
 import calendar
 from collections import defaultdict
