@@ -1,11 +1,12 @@
 import uuid
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, UUID4, Field, InstanceOf
 from squadai.tasks import Task
 from squadai.tools import BaseTool
 from squadai.llm import BaseLLM
 from squadai.utils import I18N
+from squadai.utils.string_utils import interpolate_only
 
 
 class BaseAgent(ABC,BaseModel):
@@ -43,3 +44,16 @@ class BaseAgent(ABC,BaseModel):
     @abstractmethod
     def create_agent_executor(self, tools=None) -> None:
         pass
+
+    def interpolate_inputs(self, inputs: Dict[str, Any]) -> None:
+        """Interpolate inputs into the agent description and backstory."""
+        if inputs:
+            self.role = interpolate_only(
+                input_string=self.role, inputs=inputs
+            )
+            self.goal = interpolate_only(
+                input_string=self.goal, inputs=inputs
+            )
+            self.backstory = interpolate_only(
+                input_string=self.backstory, inputs=inputs
+            )
