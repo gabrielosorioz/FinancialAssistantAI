@@ -13,7 +13,7 @@ class Agent(BaseAgent):
     def execute_task(self,
                      task: Task,
                      tools: Optional[List[BaseTool]] = None
-    ) -> Any:
+    ) -> TaskOutput:
         """Execute a task with the agent.
 
         Args:
@@ -47,7 +47,24 @@ class Agent(BaseAgent):
         tools = tools or self.tools or []
         self.create_agent_executor(tools=tools, task=task)
 
-        return self._execute(task_prompt=task_prompt)
+        response = self._execute(task_prompt=task_prompt)
+        # Cria e retorna um TaskOutput baseado na resposta e formato esperado
+        output_format = OutputFormat.RAW
+
+        output = TaskOutput(
+            description=task.description,
+            name=task.name,
+            expected_output=task.expected_output,
+            raw=response.content if hasattr(response, 'content') else str(response),
+            agent=str(self.id),
+            output_format=output_format,
+        )
+
+        # Se houver tool_usages no agent_executor, adiciona-os ao TaskOutput
+        # if hasattr(self.agent_executor, 'tool_usages') and self.agent_executor.tool_usages:
+        #     output.tool_usages = self.agent_executor.tool_usages
+        task.output = output
+        return output;
 
     def create_agent_executor(
             self, tools: Optional[List[BaseTool]] = None,

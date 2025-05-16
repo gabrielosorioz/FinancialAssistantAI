@@ -1,9 +1,12 @@
 import uuid
 from typing import Dict, List, Optional, Any
+
+from pydantic import BaseModel
+
 from squadai.agents import BaseAgent
 from squadai.llm import BaseLLM
 from squadai.tasks import Task
-from squadai.tools import BaseTool
+from squadai.tools import BaseTool, ToolCall, ToolUsage
 from squadai.utils.agents_utils import format_message_for_llm
 from squadai.utils.agents_utils import parse_tools
 
@@ -17,7 +20,8 @@ class AgentExecutor:
         tools: List[BaseTool],
         memory: bool = False,
         messages: List[Dict[str, str]] = None,
-        tool_results: List[Dict] = None
+        tool_calls: List[ToolCall] = None,
+        tool_usages: List[ToolUsage] = None
     ):
         self.id = uuid.uuid4()
         self.agent = agent
@@ -27,7 +31,8 @@ class AgentExecutor:
         self.tools = tools if tools is not None else []
         self.memory = memory
         self.messages = messages if messages is not None else []
-        self.tool_results = tool_results if tool_results is not None else []
+        self.tool_calls = tool_calls if tool_calls is not None else []
+        self.tool_usages = tool_usages if tool_usages is not None else []
 
     def invoke(self, inputs: Dict[str, str]) -> Dict[str, Any]:
         """
@@ -97,19 +102,28 @@ class AgentExecutor:
                 if not tool:
                     continue
 
-                # Executa a ferramenta
                 import json
                 args = json.loads(call.function.arguments)
                 result = tool.run(**args)
 
-                # Registra o resultado
-                self.tool_results.append({
-                    "tool_name": call.function.name,
-                    "args": args,
-                    "result": result
-                })
+                tool_call = ToolCall(
+                    tool= tool,
+                    tool_name=call.function.name,
+                    arguments=args,
+                    result=result
+                )
+                self.tool_calls.append(tool_call)
 
-                # Adiciona o resultado ao contexto como uma mensagem de ferramenta
+                tool_usage = ToolUsage(
+                    tool_calls=self.tool_calls,
+                    agent_id=self.agent.id,
+                    task_id=self.task.id
+                )
+
+                self.tool_usages.append(tool_usage)
+
+                print(self.tool_usages[0].summary)
+
                 result_str = json.dumps(result) if not isinstance(result, str) else result
 
                 if self.memory:

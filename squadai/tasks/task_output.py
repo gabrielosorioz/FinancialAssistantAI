@@ -1,6 +1,6 @@
 import json
 import uuid
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from .output_format import OutputFormat
 
 from pydantic import (
@@ -9,6 +9,7 @@ from pydantic import (
     Field
 )
 
+from ..tools import ToolUsage
 
 
 class TaskOutput(BaseModel):
@@ -35,6 +36,11 @@ class TaskOutput(BaseModel):
         frozen=True,
         description="Unique identifier for the object, not set by user.",
     )
+
+    # tool_usages: Optional[List[ToolUsage]] = Field(
+    #     default_factory=[],
+    #     description="Tools used to perform the task."
+    # )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert json_output and pydantic_output to a dictionary."""
