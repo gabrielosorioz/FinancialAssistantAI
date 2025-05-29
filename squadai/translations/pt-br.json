@@ -1,8 +1,9 @@
 {
   "slices": {
-    "role_playing":"Você é {role}. {backstory}\n Seu objetivo pessoal é: {goal}",
+    "role_playing":"Você é {role}. {backstory}\n Seu objetivo é: {goal}",
     "task": "\nTarefa atual: {input}\n",
     "task_expected_output": "\nEste é o critério esperado para sua resposta final: {expected_output}\n",
-    "formatted_task_instructions": "Retornar uma resposta estritamente no formato: {output_format}\ncom o seguinte ``scheme``: {output_scheme}"
+    "formatted_task_instructions_json": "Retornar uma resposta estritamente no formato: {output_format}\ncom o seguinte ``scheme``: {output_scheme}\nGaranta que a saída final não inclua nenhum marcador de bloco de código, como ```json ou ```python ou '```'." ,
+    "formatted_task_instructions": "\"Garanta que sua resposta final contenha apenas o conteúdo no seguinte formato: {output_format}\n\nGaranta que a saída final não inclua nenhum marcador de bloco de código, como ```json ou ```python ou '```'."
   }
 }
