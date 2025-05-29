@@ -137,7 +137,7 @@ class BaseTool(BaseModel, ABC):
                 args_info.append(f"- {arg_name}: {arg_type}{required_mark}. {arg_desc}")
 
         # Gera a descrição completa
-        args_section = "\n".join(args_info) if args_info else "Nenhum argumento necessário."
+        args_section = "\nArgumentos: ".join(args_info) if args_info else ""
 
-        self.description = f"""{original_description} Argumentos:
+        self.description = f"""{original_description}
         {args_section}"""

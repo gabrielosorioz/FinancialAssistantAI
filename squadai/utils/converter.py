@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union, get_args, get_origin
+from typing import  Type, Union, get_args, get_origin
 from pydantic import BaseModel
 
 def generate_model_description(model: Type[BaseModel]) -> str:

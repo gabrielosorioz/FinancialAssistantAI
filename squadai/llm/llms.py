@@ -1,36 +1,16 @@
-import os
 from dotenv import load_dotenv
-from openai import OpenAI
-from typing import Any
-from pydantic import Field
-
+from litellm import completion
+from litellm.litellm_core_utils.streaming_handler import CustomStreamWrapper
+from litellm.types.utils import ModelResponse
 from .base_llm import BaseLLM
-
+load_dotenv(override=True)
 
 class DeepSeekLLM(BaseLLM):
-    """Cliente para comunicação com a API OpenAI compatível (DeepSeek)."""
-    base_url: str = "https://api.deepseek.com/v1"
-    api_key: str = Field(default=None, exclude=True)
-    llm_client: Any = Field(default=None, exclude=True)
 
-    def __init__(self, **data):
-        load_dotenv()
-        data.setdefault("api_key", os.getenv("DEEPSEEK_API_KEY"))
-
-        if not data["api_key"]:
-            raise ValueError("DEEPSEEK_API_KEY não encontrado no ambiente.")
-
-        super().__init__(**data)
-
-        self.llm_client = OpenAI(
-            api_key=self.api_key,
-            base_url=self.base_url,
-        )
-
-    def call(self, messages, tools=None) -> Any:
-        response = self.llm_client.chat.completions.create(
-            model="deepseek-chat",
+    def call(self, messages, tools) ->  ModelResponse | CustomStreamWrapper:
+        response = completion(
+            model="deepseek/deepseek-chat",
             messages=messages,
-            tools=tools or []
+            tools=tools,
         )
-        return response.choices[0].message
+        return response
