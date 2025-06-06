@@ -7,10 +7,11 @@ load_dotenv(override=True)
 
 class DeepSeekLLM(BaseLLM):
 
-    def call(self, messages, tools) ->  ModelResponse | CustomStreamWrapper:
+    def call(self, messages, tools,**kwargs) ->  ModelResponse | CustomStreamWrapper:
         response = completion(
             model="deepseek/deepseek-chat",
             messages=messages,
             tools=tools,
+            **kwargs
         )
         return response

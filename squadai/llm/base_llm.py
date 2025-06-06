@@ -5,5 +5,5 @@ from pydantic import BaseModel
 
 class BaseLLM(BaseModel,ABC):
     @abstractmethod
-    def call(self, messages, tools) -> Any:
+    def call(self, messages, tools,**kwargs) -> Any:
         pass
