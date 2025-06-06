@@ -30,18 +30,14 @@ class Agent(BaseAgent):
             if task.output_json:
                 schema = generate_model_description(task.output_json)
                 task_prompt += "\n" + self.i18n.slice(
-                    "formatted_task_instructions"
+                    "formatted_task_instructions_json"
                 ).format(output_format=OutputFormat.JSON,
                          output_scheme=schema
                 )
 
             elif task.output_pydantic:
-                schema = generate_model_description(task.output_json)
-                formatted_task_instructions = """
-                                    Retornar uma resposta estritamente:
-                                    com o seguinte ``scheme`` (formato): {output_format}
-                                    """
-                task_prompt += "\n" + formatted_task_instructions.format(
+                schema = generate_model_description(task.output_pydantic)
+                task_prompt += "\n" + self.i18n.slice("formatted_task_instructions").format(
                     output_format=schema
                 )
         tools = tools or self.tools or []
