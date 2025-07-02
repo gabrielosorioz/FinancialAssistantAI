@@ -1,8 +1,5 @@
 import uuid
 from typing import Dict, List, Optional, Any
-
-from pydantic import BaseModel
-
 from squadai.agents import BaseAgent
 from squadai.llm import BaseLLM
 from squadai.tasks import Task
@@ -12,23 +9,23 @@ from squadai.utils.agents_utils import parse_tools
 
 class AgentExecutor:
     def __init__(
-        self,
-        agent: BaseAgent,
-        task: Task,
-        llm: BaseLLM,
-        prompt: dict[str, str],
-        tools: List[BaseTool],
-        memory: bool = False,
-        messages: List[Dict[str, str]] = None,
-        tool_calls: List[ToolCall] = None,
-        tool_usages: List[ToolUsage] = None
+            self,
+            agent: BaseAgent,
+            task: Task,
+            llm: BaseLLM,
+            prompt: dict[str, str],
+            tools: List[BaseTool],
+            memory: bool = False,
+            messages: List[Dict[str, str]] = None,
+            tool_calls: List[ToolCall] = None,
+            tool_usages: List[ToolUsage] = None
     ):
         self.id = uuid.uuid4()
         self.agent = agent
         self.task = task
         self.llm = llm
         self.prompt = prompt
-        self.tools = tools if tools is not None else []
+        self.tools = tools if tools is not None or [] else []
         self.memory = memory
         self.messages = messages if messages is not None else []
         self.tool_calls = tool_calls if tool_calls is not None else []
@@ -57,14 +54,15 @@ class AgentExecutor:
                 tools=parsed_tools
             )
 
-            # Adiciona a resposta como mensagem do assistente
-            if hasattr(response, "content") and response.content:
-                if self.memory:
-                    self._append_message(response.content, role="assistant")
+            if response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
 
-            # Processa chamadas de ferramentas
-            if hasattr(response, 'tool_calls') and response.tool_calls:
-                self._process_tool_calls(response.tool_calls)
+                if hasattr(message, "content") and message.content:
+                    if self.memory:
+                        self._append_message(message.content, role="assistant")
+
+                if hasattr(message, 'tool_calls') and message.tool_calls:
+                    self._process_tool_calls(message.tool_calls)
 
             return response
 
@@ -82,14 +80,13 @@ class AgentExecutor:
         """
 
         if role == "tool" and not tool_call_id:
-                return
+            return
 
         self.messages.append(format_message_for_llm(text, role=role, tool_call_id=tool_call_id))
 
     def clear_memory(self):
         """Limpa o contexto armazenado."""
         if self.memory:
-            # Preserva a mensagem do sistema se existir
             system_message = next((msg for msg in self.messages if msg["role"] == "system"), None)
             self.messages = [system_message] if system_message else []
 
@@ -107,7 +104,7 @@ class AgentExecutor:
                 result = tool.run(**args)
 
                 tool_call = ToolCall(
-                    tool= tool,
+                    tool=tool,
                     tool_name=call.function.name,
                     arguments=args,
                     result=result
@@ -122,9 +119,12 @@ class AgentExecutor:
 
                 self.tool_usages.append(tool_usage)
 
-                print(self.tool_usages[0].summary)
-
-                result_str = json.dumps(result) if not isinstance(result, str) else result
+                if isinstance(result, str):
+                    result_str = result
+                elif hasattr(result, 'model_dump'):
+                    result_str = json.dumps(result.model_dump())
+                else:
+                    result_str = json.dumps(result)
 
                 if self.memory:
                     self._append_message(result_str, role="tool", tool_call_id=call.id)

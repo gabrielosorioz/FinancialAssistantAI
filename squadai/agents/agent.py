@@ -5,6 +5,7 @@ from squadai.agents.agent_executor import AgentExecutor
 from squadai.tasks import Task, TaskOutput, OutputFormat
 from squadai.tools import BaseTool
 from squadai.utils import generate_model_description
+from squadai.utils.converter import PydanticParserTool
 from squadai.utils.prompts import Prompts
 
 
@@ -41,10 +42,15 @@ class Agent(BaseAgent):
                     output_format=schema
                 )
         tools = tools or self.tools or []
+
+        if task.output_pydantic:
+            task_structured_output = task.output_pydantic
+            pydantic_parser_tool = PydanticParserTool(target_model=task_structured_output)
+            tools.append(pydantic_parser_tool)
+
         self.create_agent_executor(tools=tools, task=task)
 
         response = self._execute(task_prompt=task_prompt)
-        # Cria e retorna um TaskOutput baseado na resposta e formato esperado
         output_format = OutputFormat.RAW
 
         output = TaskOutput(
@@ -53,12 +59,15 @@ class Agent(BaseAgent):
             expected_output=task.expected_output,
             raw=response.content if hasattr(response, 'content') else str(response),
             agent=str(self.id),
-            output_format=output_format,
+            output_format=output_format
         )
 
-        # Se houver tool_usages no agent_executor, adiciona-os ao TaskOutput
-        # if hasattr(self.agent_executor, 'tool_usages') and self.agent_executor.tool_usages:
-        #     output.tool_usages = self.agent_executor.tool_usages
+        if task.output_pydantic and self.agent_executor.tool_calls:
+            for tool_call in self.agent_executor.tool_calls:
+                if isinstance(tool_call.tool, PydanticParserTool):
+                    output.pydantic = tool_call.result
+                    break
+
         task.output = output
         return output;
 

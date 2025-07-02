@@ -14,7 +14,7 @@ class BaseAgent(ABC,BaseModel):
     role: str
     backstory: str
     goal: str
-    tools: Optional[List[BaseTool]]
+    tools: Optional[List[BaseTool]] = Field(default=None)
     memory: bool
     verbose: bool
     llm: BaseLLM
@@ -23,6 +23,7 @@ class BaseAgent(ABC,BaseModel):
     )
     i18n: I18N = Field(default=I18N(), description="Internationalization settings.")
     use_system_prompt: Optional[bool] = False
+
     @abstractmethod
     def execute_task(
             self,
