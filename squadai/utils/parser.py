@@ -4,7 +4,6 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
 from pydantic import BaseModel, ValidationError
-
 logger = logging.getLogger(__name__)
 
 
@@ -65,7 +64,6 @@ class OpenAIToolResponseParser:
                     error_details = self._format_validation_error(e, parsed_args)
                     raise ToolParsingError(f"Validação falhou: {error_details}") from e
 
-            # Modo tolerante = com recuperação de erros
             return self._create_model_instance(parsed_args)
 
         except Exception as e:
@@ -102,13 +100,11 @@ class OpenAIToolResponseParser:
                     logger.warning(f"Tool call no índice {i} não é um dict: {type(tool_call)}")
                     continue
 
-                # Parse individual
                 parsed_result = self.parse_tool_response(arguments)
                 results.append(parsed_result)
 
             except Exception as e:
                 logger.error(f"Erro ao processar tool call {i}: {str(e)}")
-                # Continuar processando outras chamadas
                 continue
 
         return results
@@ -187,7 +183,6 @@ class OpenAIToolResponseParser:
                             cleaned_data[field_name] = converted_value
 
                 elif error_type == "extra_forbidden":
-                    # Campo extra não permitido - remover
                     if field_name and field_name in cleaned_data:
                         del cleaned_data[field_name]
 
@@ -200,8 +195,6 @@ class OpenAIToolResponseParser:
     def _get_default_value_for_field(self, field_name: str, field_schema: Dict[str, Any]) -> Any:
         """Obtém valor padrão para um campo baseado no schema."""
         field_type = field_schema.get("type", "string")
-
-        # Valores padrão por tipo
         default_values = {
             "string": "",
             "integer": 0,
@@ -303,35 +296,3 @@ class ToolResponseParserFactory:
         """
         parser = ToolResponseParserFactory.create_parser(pydantic_model)
         return parser.parse_tool_response(tool_arguments)
-
-
-# Exemplo de uso
-if __name__ == "__main__":
-    from pydantic import BaseModel, Field
-    from typing import List
-
-
-    # Modelo de exemplo
-    class PersonInfo(BaseModel):
-        name: str = Field(description="Nome da pessoa")
-        age: int = Field(description="Idade da pessoa")
-        emails: List[str] = Field(description="Lista de emails")
-        is_active: bool = Field(default=True, description="Se a pessoa está ativa")
-
-
-    # Simular resposta da LLM
-    tool_response = {
-        "name": "João Silva",
-        "age": "30",  # String que será convertida para int
-        "emails": ["joao@email.com", "joao.silva@work.com"],
-        "is_active": "true"  # String que será convertida para bool
-    }
-
-    # Usar o parser
-    try:
-        parser = OpenAIToolResponseParser(PersonInfo)
-        result = parser.parse_tool_response(tool_response)
-        print(f"Resultado: {result}")
-        print(f"Tipo: {type(result)}")
-    except ToolParsingError as e:
-        print(f"Erro no parsing: {e}")
