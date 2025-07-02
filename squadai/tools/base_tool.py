@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, create_model
 
 
 class BaseTool(BaseModel, ABC):
-    """Classe base para todas as ferramentas."""
+    """Base class for all tools."""
     name: str
     description: str
     args_schema: Optional[Type[BaseModel]] = None
@@ -136,8 +136,6 @@ class BaseTool(BaseModel, ABC):
 
                 args_info.append(f"- {arg_name}: {arg_type}{required_mark}. {arg_desc}")
 
-        # Gera a descrição completa
-        args_section = "\nArgumentos: ".join(args_info) if args_info else ""
+        args_section = "\nArguments:\n" + "\n".join(args_info) if args_info else ""
 
-        self.description = f"""{original_description}
-        {args_section}"""
+        self.description = f"""{original_description}{args_section}"""
